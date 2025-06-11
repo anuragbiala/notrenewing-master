@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+.bg-primary {
+    background-color: #0f366b;
+}
+
+.text-primary-foreground 
+ {
+    color: #fff;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+font-family: "Inter", sans-serif;
+}
+.hero-gradient, .to-brand-skyBlue {
+    background: linear-gradient(135deg, #10376e, #2b6eb3);
+}
+
+main {
+    margin-top: 64px;
+}
+
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1400px;
+    }
+}
+.container {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 2rem;
+    padding-left: 2rem;
+}
+
+.bg-brand-blue {
+    --tw-bg-opacity: 1;
+    background-color: #1a365d;
+}
+
+ .domain-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px #0000001a, 0 10px 10px -5px #0000000a;
+}
+
+.domain-card {
+    transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
+}
