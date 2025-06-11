@@ -79,7 +79,7 @@ export default function MyDomains() {
   const handleLikeToggle = async (domainId) => {
   const userId = localStorage.getItem("user_id");
   if (!userId) {
-    alert("User not logged in.");
+    alert("You have to login to favorite this domain.");
     return;
   }
 
