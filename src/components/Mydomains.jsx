@@ -92,7 +92,7 @@ const handleDelete = async (domainId) => {
   if (result.isConfirmed) {
     try {
       const response = await fetch(
-        `http://localhost/notrenewing/public/api/delete-domain/${domainId}`,
+        `https://actyvsolutions.com/notrenewing/public/delete-domain/${domainId}`,
         {
           method: "DELETE",
           headers: {
