@@ -58,15 +58,18 @@ export default function MyBookings() {
                   <span className="font-medium">Status:</span>{" "}
                   <span
                     className={`inline-block px-2 py-1 rounded text-white text-xs ${
-                      booking.status === "Confirmed"
+                        booking.status === "Confirmed"
                         ? "bg-green-500"
                         : booking.status === "Pending"
                         ? "bg-yellow-500"
+                        : booking.status === "Cancelled" || booking.status === "Cancelled"
+                        ? "bg-gray-500"
                         : "bg-red-500"
                     }`}
-                  >
+                    >
                     {booking.status}
-                  </span>
+                    </span>
+
                 </p>
               </div>
               <button className="bg-primary text-white hover:bg-primary/90 h-10 px-4 py-2 w-full rounded-md">
