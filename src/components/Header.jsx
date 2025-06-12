@@ -1,6 +1,7 @@
     "use client";
 
     import { useState, useEffect } from "react";
+    import { useRouter } from "next/navigation";
     import Link from "next/link";
     import Swal from "sweetalert2";
 
@@ -9,6 +10,22 @@
       const [activeItem, setActiveItem] = useState(null);
       const [showSignIn, setShowSignIn] = useState(false);
       const [showRegister, setShowRegister] = useState(false);
+       const [userType, setUserType] = useState("Buyer");
+      const router = useRouter();
+
+
+       useEffect(() => {
+        const type = localStorage.getItem("user_type") || "buyer";
+        setUserType(type);
+      }, []);
+
+      const handleClick = () => {
+        if (userType === "seller") {
+          router.push("/seller-dashboard");
+        } else {
+          router.push("/buyer-dashboard");
+        }
+      };
 
       const [formData, setFormData] = useState({
         full_name: "",
@@ -111,6 +128,7 @@
       localStorage.setItem("username", data.user.username || data.user.full_name || "User");
       localStorage.setItem("useremail", data.user.email || "User");
       localStorage.setItem("user_id", data.user.id || "User");
+      localStorage.setItem("user_type", data.user.user_type || "User");
       setUsername(data.user.username || data.user.full_name || "User");
       window.location.reload();
     } else {
@@ -140,7 +158,7 @@
       localStorage.removeItem("username");
 
       Swal.fire("Logged out", "You have been logged out.", "success").then(() => {
-        window.location.reload();
+        window.location.href = "/"; 
       });
     } else {
       Swal.fire("Error", data.message || "Logout failed", "error");
@@ -170,12 +188,12 @@
             <div className="flex items-center space-x-4">
             {username ? (
               <>
-                <a
-                  href="/seller-dashboard"
+                 <button
+                  onClick={handleClick}
                   className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium h-10 px-4 py-2 bg-gray-100 text-gray-800"
                 >
                   Dashboard
-                </a>
+                </button>
                 <button
                   onClick={handleLogout}
                   className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium h-10 px-4 py-2 bg-[#0f366b] text-white hover:bg-[#0f366b]/90 cursor-pointer"

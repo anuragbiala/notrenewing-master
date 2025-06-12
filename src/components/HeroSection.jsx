@@ -1,4 +1,31 @@
-export default function HeroSection() {
+    "use client";
+
+    import { useState, useEffect } from "react";
+    import { useRouter } from "next/navigation";
+    import Link from "next/link";
+    import Swal from "sweetalert2";
+
+    export default function HeroSection() {
+      const [isOpen, setIsOpen] = useState(false);
+      const [activeItem, setActiveItem] = useState(null);
+      const [showSignIn, setShowSignIn] = useState(false);
+      const [showRegister, setShowRegister] = useState(false);
+       const [userType, setUserType] = useState("Buyer");
+      const router = useRouter();
+
+
+       useEffect(() => {
+        const type = localStorage.getItem("user_type") || "buyer";
+        setUserType(type);
+      }, []);
+
+      const handleClick = () => {
+        if (userType === "seller") {
+          router.push("/seller-dashboard");
+        } else {
+          router.push("/buyer-dashboard");
+        }
+      };
   return (
     <>
       <main>
@@ -17,8 +44,8 @@ export default function HeroSection() {
                   Browse Domains
                 </button>
               </a>
-              <a href="/seller-dashboard">
-                <button className="inline-flex items-center justify-center gap-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 h-11 rounded-md px-8 border bg-background border-white hover:bg-white hover:text-accent-foreground text-[#0f366b] cursor-pointer">
+              <a>
+                <button onClick={handleClick} className="inline-flex items-center justify-center gap-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 h-11 rounded-md px-8 border bg-background border-white hover:bg-white hover:text-accent-foreground text-[#0f366b] cursor-pointer">
                   List Your Domain
                 </button>
               </a>

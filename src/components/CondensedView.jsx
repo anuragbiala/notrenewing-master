@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 export default function MyDomains() {
   const [condensedView, setCondensedView] = useState(false);
@@ -141,6 +142,56 @@ useEffect(() => {
 
   fetchLikedDomains();
 }, []);
+
+
+const handleDomainBooking = async () => {
+  const userId = localStorage.getItem("user_id");
+  const domainId = selectedDomain?.id;
+  const userType = localStorage.getItem("user_type");
+
+  if (!userId || !domainId) {
+    Swal.fire("Error", "Missing user or domain information.", "error");
+    return;
+  }
+
+  if (userType !== "buyer") {
+    Swal.fire("Access Denied", "You are not a buyer. Please login as a buyer.", "warning");
+    return;
+  }
+
+  const bookingData = {
+    domain_id: domainId,
+    user_id: userId,
+    status: "Pending",
+    payment: "100",
+  };
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/domain-bookings`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingData),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.status) {
+      Swal.fire("Success", data.message, "success").then(() => {
+        handleCloseModal();
+      });
+    } else {
+      Swal.fire("Error", data.message || "Booking failed", "error");
+    }
+  } catch (error) {
+    Swal.fire("Error", "Something went wrong during booking", "error");
+  }
+};
+
 
   return (
     <div className="mb-8 space-y-4">
@@ -361,7 +412,7 @@ useEffect(() => {
                 <span className="text-gray-500 font-bold">Total:</span>
                 <span className="font-bold text-lg">$100.00</span>
               </div>
-              <button  onClick={() => alert("Purchase functionality not implemented")} className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full">
+              <button onClick={handleDomainBooking} className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full">
                 Proceed to Payment
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

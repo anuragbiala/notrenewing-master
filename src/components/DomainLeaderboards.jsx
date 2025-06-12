@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 export default function DomainLeaderboards() {
   const [domains, setDomains] = useState([]);
@@ -100,6 +101,57 @@ useEffect(() => {
 
   fetchLikedDomains();
 }, []);
+
+
+const handleDomainBooking = async () => {
+  const userId = localStorage.getItem("user_id");
+  const domainId = selectedDomain?.id;
+  const userType = localStorage.getItem("user_type");
+
+  if (!userId || !domainId) {
+    Swal.fire("Error", "Missing user or domain information.", "error");
+    return;
+  }
+
+  if (userType !== "buyer") {
+    Swal.fire("Access Denied", "You are not a buyer. Please login as a buyer.", "warning");
+    return;
+  }
+
+  const bookingData = {
+    domain_id: domainId,
+    user_id: userId,
+    status: "Pending",
+    payment: "100",
+  };
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/domain-bookings`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingData),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.status) {
+      Swal.fire("Success", data.message, "success").then(() => {
+        handleCloseModal();
+      });
+    } else {
+      Swal.fire("Error", data.message || "Booking failed", "error");
+    }
+  } catch (error) {
+    Swal.fire("Error", "Something went wrong during booking", "error");
+  }
+};
+
+
 
 
   const renderDomains = (filter) => {
@@ -253,9 +305,7 @@ useEffect(() => {
                   <span className="font-bold text-lg">$100.00</span>
                 </div>
                 <button
-                  onClick={() =>
-                    alert("Purchase functionality not implemented")
-                  }
+                  onClick={handleDomainBooking}
                   className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium bg-primary text-white hover:bg-primary/90 h-10 px-4 py-2 w-full"
                 >
                   Proceed to Payment

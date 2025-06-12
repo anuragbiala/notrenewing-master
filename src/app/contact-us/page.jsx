@@ -23,8 +23,8 @@ export default function Contact() {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const res = await fetch("http://localhost/notrenewing/public/api/add-home-contact", {
+   try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/add-home-contact`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
