@@ -10,7 +10,7 @@
       const [activeItem, setActiveItem] = useState(null);
       const [showSignIn, setShowSignIn] = useState(false);
       const [showRegister, setShowRegister] = useState(false);
-       const [userType, setUserType] = useState("Buyer");
+      const [userType, setUserType] = useState("Buyer");
       const router = useRouter();
 
 

@@ -49,7 +49,7 @@ export default function Contact() {
       } else {
         Swal.fire({
           title: "Error",
-          text: "Failed to submit the form. Try again.",
+          text: "Failed To Submit The Form. Try Again.",
           icon: "error",
         });
       }

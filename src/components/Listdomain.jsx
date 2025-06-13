@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import Calendar from "./Calendar";
+import Swal from "sweetalert2";
+
 
 export default function ListDomain() {
   const [categories, setCategories] = useState([]);
@@ -16,6 +18,9 @@ export default function ListDomain() {
   const [filter, setFilter] = useState("");
   const [description, setDescription] = useState("");
   const [isSponsored, setIsSponsored] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [result, setResult] = useState(null);
+
 
   useEffect(() => {
   if (typeof window !== "undefined") {
@@ -133,12 +138,59 @@ export default function ListDomain() {
                 required
               />
               <button
-                className="h-10 w-[150px] rounded-md border px-2 py-2 text-sm bg-[#f9fafb] border-[#e2e8f0] text-gray-500 cursor-not-allowed"
-                type="button"
-                disabled
+                className={`${
+                  isVerifying
+                    ? "h-10 w-[150px] rounded-md px-2 py-2 text-sm bg-gray-400 text-white cursor-wait"
+                    : "h-10 w-[150px] rounded-md border px-2 py-2 text-sm bg-[#f9fafb] border-[#e2e8f0] text-gray-500 cursor-not-allowed"
+                }`}
+                onClick={async () => {
+                  setIsVerifying(true);
+                  setResult(null);
+
+                  try {
+                    const apiKey = "at_2j7A5Lu8plB26KBDLGT3dwVTFiT5q";
+                    const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domainName}&outputFormat=JSON`;
+
+                    const res = await fetch(url);
+                    const data = await res.json();
+
+                    if (data.WhoisRecord && data.WhoisRecord.domainName) {
+                      setResult({
+                        domainName: data.WhoisRecord.domainName,
+                        createdDate: data.WhoisRecord.createdDate,
+                        registrarName: data.WhoisRecord.registrarName,
+                        status: "Domain found",
+                      });
+
+                      Swal.fire({
+                        icon: "success",
+                        title: "Domain Verified!",
+                        text: `Domain: ${data.WhoisRecord.domainName} found.`,
+                      });
+                    } else {
+                      Swal.fire({
+                        icon: "error",
+                        title: "Domain Not Found",
+                        text: "The domain is not found or an error occurred.",
+                      });
+                    }
+                  } catch (err) {
+                    console.error(err);
+                    Swal.fire({
+                      icon: "error",
+                      title: "Error",
+                      text: "Something went wrong while verifying the domain.",
+                    });
+                  } finally {
+                    setIsVerifying(false);
+                  }
+                }}
+                disabled={isVerifying}
               >
-                Verify Domain
+                {isVerifying ? "Verifying..." : "Verify Domain"}
               </button>
+
+
             </div>
             <p className="text-sm text-gray-500">
               Include the full domain name with TLD (e.g., .com, .org)
