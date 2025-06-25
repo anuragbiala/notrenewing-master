@@ -124,78 +124,100 @@ export default function ListDomain() {
             <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Domain Name */}
        
-          <div className="space-y-2 mb-4">
-            <label className="text-sm font-medium" htmlFor="domain-name">
-              Domain Name
-            </label>
-            <div className="flex space-x-2">
-              <input
-                value={domainName}
-                onChange={(e) => setDomainName(e.target.value)}
-                className="flex h-10 w-full rounded-md border px-3 py-2 text-base bg-[#f9fafb] border-[#e2e8f0]"
-                id="domain-name"
-                placeholder="example.com"
-                required
-              />
-              <button
-                className={`${
-                  isVerifying
-                    ? "h-10 w-[150px] rounded-md px-2 py-2 text-sm bg-gray-400 text-white cursor-wait"
-                    : "h-10 w-[150px] rounded-md border px-2 py-2 text-sm bg-[#f9fafb] border-[#e2e8f0] text-gray-500 cursor-not-allowed"
-                }`}
-                onClick={async () => {
-                  setIsVerifying(true);
-                  setResult(null);
+       <div className="space-y-2 mb-4">
+        <label className="text-sm font-medium" htmlFor="domain-name">
+          Domain Name
+        </label>
+        <div className="flex space-x-2">
+          <input
+            value={domainName}
+            onChange={(e) => setDomainName(e.target.value)}
+            className="flex h-10 w-full rounded-md border px-3 py-2 text-base bg-[#f9fafb] border-[#e2e8f0]"
+            id="domain-name"
+            placeholder="example.com"
+            required
+          />
+          <button
+            className={`${
+              isVerifying
+                ? "h-10 w-[150px] rounded-md px-2 py-2 text-sm bg-gray-400 text-white cursor-wait"
+                : "h-10 w-[150px] rounded-md border px-2 py-2 text-sm bg-[#f9fafb] border-[#e2e8f0] text-gray-500"
+            }`}
+            onClick={async () => {
+              setIsVerifying(true);
+              setResult(null);
 
-                  try {
-                    const apiKey = "at_TCm5VoaHg0CZQXYkFQJmPfme3AQTV";
-                    const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domainName}&outputFormat=JSON`;
+              try {
+                const apiKey = "at_TCm5VoaHg0CZQXYkFQJmPfme3AQTV";
+                const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domainName}&outputFormat=JSON`;
 
-                    const res = await fetch(url);
-                    const data = await res.json();
+                const res = await fetch(url);
+                const data = await res.json();
 
-                    if (data.WhoisRecord && data.WhoisRecord.domainName) {
-                      setResult({
-                        domainName: data.WhoisRecord.domainName,
-                        createdDate: data.WhoisRecord.createdDate,
-                        registrarName: data.WhoisRecord.registrarName,
-                        status: "Domain found",
-                      });
+                const record = data.WhoisRecord;
 
-                      Swal.fire({
-                        icon: "success",
-                        title: "Domain Verified!",
-                        text: `Domain: ${data.WhoisRecord.domainName} found.`,
-                      });
-                    } else {
-                      Swal.fire({
-                        icon: "error",
-                        title: "Domain Not Found",
-                        text: "The domain is not found or an error occurred.",
-                      });
-                    }
-                  } catch (err) {
-                    console.error(err);
+                if (record && record.domainName) {
+                  const currentUser = localStorage.getItem("username")?.toLowerCase();
+                  const registrantName = record.registrant?.name?.toLowerCase() || "";
+                  const expiryDate = new Date(record.expiresDate);
+                  const now = new Date();
+
+                  if (expiryDate < now) {
                     Swal.fire({
                       icon: "error",
-                      title: "Error",
-                      text: "Something went wrong while verifying the domain.",
+                      title: "Domain Expired",
+                      text: "This domain has already expired.",
                     });
-                  } finally {
-                    setIsVerifying(false);
+                  } else if (registrantName.includes(currentUser)) {
+                    setResult({
+                      domainName: record.domainName,
+                      createdDate: record.createdDate,
+                      registrarName: record.registrarName,
+                      status: "Domain found and verified",
+                    });
+
+                    Swal.fire({
+                      icon: "success",
+                      title: "Domain Verified & Added!",
+                      text: `Domain ${record.domainName} is valid and belongs to you.`,
+                    });
+
+                    // ✅ You can add your domain "save" API call here
+                  } else {
+                    Swal.fire({
+                      icon: "error",
+                      title: "Ownership Mismatch",
+                      text: "This domain does not appear to belong to the logged-in user.",
+                    });
                   }
-                }}
-                disabled={isVerifying}
-              >
-                {isVerifying ? "Verifying..." : "Verify Domain"}
-              </button>
+                } else {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Domain Not Found",
+                    text: "The domain is not found or an error occurred.",
+                  });
+                }
+              } catch (err) {
+                console.error(err);
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text: "Something went wrong while verifying the domain.",
+                });
+              } finally {
+                setIsVerifying(false);
+              }
+            }}
+            disabled={isVerifying}
+          >
+            {isVerifying ? "Verifying..." : "Verify Domain"}
+          </button>
+        </div>
+        <p className="text-sm text-gray-500">
+          Include the full domain name with TLD (e.g., .com, .org)
+        </p>
+      </div>
 
-
-            </div>
-            <p className="text-sm text-gray-500">
-              Include the full domain name with TLD (e.g., .com, .org)
-            </p>
-          </div>
 
           {/* Category */}
           <div className="space-y-2">
