@@ -332,21 +332,21 @@ const handleDomainBooking = async () => {
                   <path d="m15 18-6-6 6-6" />
                 </svg>
                 <span onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}>Previous</span>
-              </a>
-            </li>
+                disabled={currentPage === 1}>Previous</span>
+                    </a>
+                  </li>
 
-           {[...Array(totalPages).keys()].map((num) => (
-          <button
-            key={num + 1}
-            className={`flex items-center justify-center h-10 w-10 rounded-md text-sm font-medium ${
-              currentPage === num + 1 ? "bg-gray-200 text-gray-900" : ""
-            }`}
-            onClick={() => setCurrentPage(num + 1)}
-          >
-            {num + 1}
-          </button>
-        ))}
+                {[...Array(totalPages).keys()].map((num) => (
+                <button
+                  key={num + 1}
+                  className={`flex items-center justify-center h-10 w-10 rounded-md text-sm font-medium ${
+                    currentPage === num + 1 ? "bg-gray-200 text-gray-900" : ""
+                  }`}
+                  onClick={() => setCurrentPage(num + 1)}
+                >
+                  {num + 1}
+                </button>
+              ))}
 
             <li>
               <a

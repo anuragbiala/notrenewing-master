@@ -148,7 +148,7 @@ export default function ListDomain() {
                   setResult(null);
 
                   try {
-                    const apiKey = "at_2j7A5Lu8plB26KBDLGT3dwVTFiT5q";
+                    const apiKey = "at_TCm5VoaHg0CZQXYkFQJmPfme3AQTV";
                     const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domainName}&outputFormat=JSON`;
 
                     const res = await fetch(url);
