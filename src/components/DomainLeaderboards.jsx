@@ -35,7 +35,7 @@ export default function DomainLeaderboards() {
     setSelectedDomain(null);
   };
 
-  const handleLikeToggle = async (domainId) => {
+const handleLikeToggle = async (domainId) => {
   const userId = localStorage.getItem("user_id");
   if (!userId) {
     alert("You have to login to favorite this domain.");
@@ -48,16 +48,20 @@ export default function DomainLeaderboards() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ domain_id: domainId, user_id: userId }),
+      body: JSON.stringify({
+        domain_id: domainId,
+        user_id: userId,
+      }),
     });
 
     const json = await res.json();
+
     if (json.liked !== undefined) {
       setLikes((prev) => ({
         ...prev,
         [domainId]: {
           liked: json.liked,
-          count: prev[domainId] ? (json.liked ? prev[domainId].count + 1 : prev[domainId].count - 1) : 1,
+          count: json.like_count,
         },
       }));
     }
@@ -65,6 +69,7 @@ export default function DomainLeaderboards() {
     console.error("Error toggling like:", error);
   }
 };
+
 
 
 useEffect(() => {
@@ -192,30 +197,30 @@ const handleDomainBooking = async () => {
             </div>
             <div className="flex items-center gap-2">
                <button
-                      onClick={() => handleLikeToggle(item.id)}
-                      className={`justify-center whitespace-nowrap text-sm font-medium h-9 rounded-md px-3 flex items-center gap-1 transition-all ${
-                        likes[item.id]?.liked ? 'text-red-500' : 'text-gray-500'
-                      }`}
-                      aria-label="Like"
-                      title="Like"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width={18}
-                        height={18}
-                        viewBox="0 0 24 24"
-                        fill={likes[item.id]?.liked ? "#F56040" : "none"}
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-heart transition-colors duration-200"
-                      >
-                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                      </svg>
-                      <span>{likes[item.id]?.count || 0}</span>
+                onClick={() => handleLikeToggle(item.id)}
+                className={`justify-center whitespace-nowrap text-sm font-medium h-9 rounded-md px-3 flex items-center gap-1 transition-all ${
+                  likes[item.id]?.liked ? 'text-red-500' : 'text-gray-500'
+                }`}
+                aria-label="Like"
+                title="Like"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={18}
+                  height={18}
+                  viewBox="0 0 24 24"
+                  fill={likes[item.id]?.liked ? "#F56040" : "none"}
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-heart transition-colors duration-200"
+                >
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                </svg>
+                <span>{likes[item.id]?.count || 0}</span>
+              </button>
 
-                    </button>
               <button
                 onClick={() => handleBuyClick(item)}
                 className="hover:bg-[#f48134] hover:text-white rounded-md h-6 p-1 flex items-center gap-1 text-xs cursor-pointer"

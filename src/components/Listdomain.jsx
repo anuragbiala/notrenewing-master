@@ -157,38 +157,104 @@ export default function ListDomain() {
                 const record = data.WhoisRecord;
 
                 if (record && record.domainName) {
-                  const currentUser = localStorage.getItem("username")?.toLowerCase();
+                  // Get logged-in user info
+                  const currentUser = localStorage.getItem("username")?.toLowerCase() || "";
+                  const currentPhone = localStorage.getItem("phone")?.toLowerCase() || "";
+                  const currentEmail = localStorage.getItem("email")?.toLowerCase() || "";
+
+                  // Get registrant info
                   const registrantName = record.registrant?.name?.toLowerCase() || "";
+                  const registrantPhone = record.registrant?.telephone?.toLowerCase() || "";
+                  const registrantEmail = record.registrant?.email?.toLowerCase() || "";
+
                   const expiryDate = new Date(record.expiresDate);
                   const now = new Date();
 
+                  let nameMatch = false;
+                  let phoneMatch = false;
+                  let emailMatch = false;
+                  let expired = false;
+
+                  // ✅ Check expiry
                   if (expiryDate < now) {
+                    expired = true;
                     Swal.fire({
                       icon: "error",
                       title: "Domain Expired",
                       text: "This domain has already expired.",
                     });
-                  } else if (registrantName.includes(currentUser)) {
-                    setResult({
-                      domainName: record.domainName,
-                      createdDate: record.createdDate,
-                      registrarName: record.registrarName,
-                      status: "Domain found and verified",
-                    });
-
-                    Swal.fire({
-                      icon: "success",
-                      title: "Domain Verified & Added!",
-                      text: `Domain ${record.domainName} is valid and belongs to you.`,
-                    });
-
-                    // ✅ You can add your domain "save" API call here
                   } else {
-                    Swal.fire({
-                      icon: "error",
-                      title: "Ownership Mismatch",
-                      text: "This domain does not appear to belong to the logged-in user.",
-                    });
+                    // ✅ Check Name
+                    if (registrantName && currentUser && registrantName.includes(currentUser)) {
+                      nameMatch = true;
+                      Swal.fire({
+                        icon: "success",
+                        title: "Name Match",
+                        text: `Domain owner name matches logged-in user: ${registrantName}`,
+                      });
+                    } else {
+                      Swal.fire({
+                        icon: "error",
+                        title: "Name Mismatch",
+                        text: "Domain owner name does not match logged-in user.",
+                      });
+                    }
+
+                    // ✅ Check Phone
+                    if (registrantPhone && currentPhone && registrantPhone.includes(currentPhone)) {
+                      phoneMatch = true;
+                      Swal.fire({
+                        icon: "success",
+                        title: "Phone Match",
+                        text: `Domain owner phone matches: ${registrantPhone}`,
+                      });
+                    } else {
+                      Swal.fire({
+                        icon: "error",
+                        title: "Phone Mismatch",
+                        text: "Domain owner phone does not match logged-in user.",
+                      });
+                    }
+
+                    // ✅ Check Email
+                    if (registrantEmail && currentEmail && registrantEmail.includes(currentEmail)) {
+                      emailMatch = true;
+                      Swal.fire({
+                        icon: "success",
+                        title: "Email Match",
+                        text: `Domain owner email matches: ${registrantEmail}`,
+                      });
+                    } else {
+                      Swal.fire({
+                        icon: "error",
+                        title: "Email Mismatch",
+                        text: "Domain owner email does not match logged-in user.",
+                      });
+                    }
+
+                    // ✅ Final Decision
+                    if (nameMatch && phoneMatch && emailMatch) {
+                      setResult({
+                        domainName: record.domainName,
+                        createdDate: record.createdDate,
+                        registrarName: record.registrarName,
+                        status: "Domain found and verified",
+                      });
+
+                      Swal.fire({
+                        icon: "success",
+                        title: "Domain Verified & Added!",
+                        text: `Domain ${record.domainName} is valid and belongs to you.`,
+                      });
+
+                      // ✅ Add your domain save logic here
+                    } else {
+                      Swal.fire({
+                        icon: "error",
+                        title: "Ownership Check Failed",
+                        text: "Domain ownership could not be fully verified.",
+                      });
+                    }
                   }
                 } else {
                   Swal.fire({
@@ -217,6 +283,7 @@ export default function ListDomain() {
           Include the full domain name with TLD (e.g., .com, .org)
         </p>
       </div>
+
 
 
           {/* Category */}

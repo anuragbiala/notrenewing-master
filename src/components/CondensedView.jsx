@@ -77,6 +77,7 @@ export default function MyDomains() {
   const indexOfFirstDomain = indexOfLastDomain - domainsPerPage;
   const currentDomains = domains.slice(indexOfFirstDomain, indexOfLastDomain);
   const totalPages = Math.ceil(domains.length / domainsPerPage);
+  
   const handleLikeToggle = async (domainId) => {
   const userId = localStorage.getItem("user_id");
   if (!userId) {
@@ -90,16 +91,20 @@ export default function MyDomains() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ domain_id: domainId, user_id: userId }),
+      body: JSON.stringify({
+        domain_id: domainId,
+        user_id: userId,
+      }),
     });
 
     const json = await res.json();
+
     if (json.liked !== undefined) {
       setLikes((prev) => ({
         ...prev,
         [domainId]: {
           liked: json.liked,
-          count: prev[domainId] ? (json.liked ? prev[domainId].count + 1 : prev[domainId].count - 1) : 1,
+          count: json.like_count,
         },
       }));
     }
@@ -271,30 +276,30 @@ const handleDomainBooking = async () => {
               <p className="text-lg font-bold">$99</p>
             </div>
             <div className="flex justify-between items-center p-6 border-t border-[#e2e8f0]">
-              <button
-                      onClick={() => handleLikeToggle(domain.id)}
-                      className={`justify-center whitespace-nowrap text-sm font-medium h-9 rounded-md px-3 flex items-center gap-1 transition-all ${
-                        likes[domain.id]?.liked ? 'text-red-500' : 'text-gray-500'
-                      }`}
-                      aria-label="Like"
-                      title="Like"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width={18}
-                        height={18}
-                        viewBox="0 0 24 24"
-                        fill={likes[domain.id]?.liked ? "#F56040" : "none"}
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-heart transition-colors duration-200"
-                      >
-                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                      </svg>
-                      <span>{likes[domain.id]?.count || 0}</span>
-                    </button>
+               <button
+                  onClick={() => handleLikeToggle(domain.id)}
+                  className={`justify-center whitespace-nowrap text-sm font-medium h-9 rounded-md px-3 flex items-center gap-1 transition-all ${
+                    likes[domain.id]?.liked ? 'text-red-500' : 'text-gray-500'
+                  }`}
+                  aria-label="Like"
+                  title="Like"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={18}
+                    height={18}
+                    viewBox="0 0 24 24"
+                    fill={likes[domain.id]?.liked ? "#F56040" : "none"}
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-heart transition-colors duration-200"
+                  >
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                  </svg>
+                  <span>{likes[domain.id]?.count || 0}</span>
+                </button>
               <button
                 onClick={() => handleBuyClick(domain)}
                 className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 cursor-pointer"
