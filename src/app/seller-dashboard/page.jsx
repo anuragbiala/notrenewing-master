@@ -13,7 +13,7 @@ export default function Dashboard() {
   const tabs = [
     { key: "my-domains", label: "My Domains" },
     { key: "list-domain", label: "List a Domain" },
-    { key: "interested-buyers", label: "Interested Buyers" },
+    // { key: "interested-buyers", label: "Interested Buyers" },
     { key: "account", label: "Account Settings" },
   ];
 
@@ -64,11 +64,11 @@ export default function Dashboard() {
                 <ListDomain />
               </div>
             )}
-            {activeTab === "interested-buyers" && (
+            {/* {activeTab === "interested-buyers" && (
               <div>
                 <InterestedBuyers />
               </div>
-            )}
+            )} */}
             {activeTab === "account" && (
               <div>
                 <AccountSettings />

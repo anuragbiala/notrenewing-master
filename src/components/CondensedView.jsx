@@ -1,10 +1,12 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 export default function MyDomains() {
   const [condensedView, setCondensedView] = useState(false);
   const [domains, setDomains] = useState([]);
+  const [isSearchMode, setIsSearchMode] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const domainsPerPage = 4;
@@ -15,21 +17,33 @@ export default function MyDomains() {
     setCondensedView(!condensedView);
   };
 
-  useEffect(() => {
-    const fetchDomains = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/get-domain`);
-        const json = await res.json();
-        if (json.status) {
-          setDomains(json.data);
-        }
-      } catch (error) {
-        console.error("Error fetching domains:", error);
-      }
-    };
-
-    fetchDomains();
+    useEffect(() => {
+    const searchResults = localStorage.getItem("searchResults");
+    if (searchResults) {
+      setIsSearchMode(true);
+      setDomains(JSON.parse(searchResults));
+    } else {
+      fetchDomains();
+    }
   }, []);
+
+  const handleShowAllDomains = () => {
+    localStorage.removeItem("searchResults");
+    fetchDomains();
+    setIsSearchMode(false);
+  };
+
+  const fetchDomains = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/get-domain`);
+      const json = await res.json();
+      if (json.status) {
+        setDomains(json.data);
+      }
+    } catch (error) {
+      console.error("Error fetching domains:", error);
+    }
+  };
 
   const handleBuyClick = (domain) => {
     setSelectedDomain(domain);
@@ -72,130 +86,129 @@ export default function MyDomains() {
     return `Expires in ${parts.join(", ")}`;
   };
 
-  // Pagination logic
   const indexOfLastDomain = currentPage * domainsPerPage;
   const indexOfFirstDomain = indexOfLastDomain - domainsPerPage;
   const currentDomains = domains.slice(indexOfFirstDomain, indexOfLastDomain);
   const totalPages = Math.ceil(domains.length / domainsPerPage);
-  
+
   const handleLikeToggle = async (domainId) => {
-  const userId = localStorage.getItem("user_id");
-  if (!userId) {
-    alert("You have to login to favorite this domain.");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/domain-like`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        domain_id: domainId,
-        user_id: userId,
-      }),
-    });
-
-    const json = await res.json();
-
-    if (json.liked !== undefined) {
-      setLikes((prev) => ({
-        ...prev,
-        [domainId]: {
-          liked: json.liked,
-          count: json.like_count,
-        },
-      }));
+    const userId = localStorage.getItem("user_id");
+    if (!userId) {
+      alert("You have to login to favorite this domain.");
+      return;
     }
-  } catch (error) {
-    console.error("Error toggling like:", error);
-  }
-};
 
-useEffect(() => {
-  const fetchLikedDomains = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/get-liked-domains`);
-      const json = await res.json();
-
-      if (json.status && Array.isArray(json.data)) {
-        const userId = localStorage.getItem("user_id");
-        const likeMap = {};
-        json.data.forEach((like) => {
-          const domainId = like.domain_id;
-
-          if (!likeMap[domainId]) {
-            likeMap[domainId] = {
-              count: 0,
-              liked: false
-            };
-          }
-
-          likeMap[domainId].count += 1;
-          if (String(like.user_id) === String(userId)) {
-            likeMap[domainId].liked = true;
-          }
-        });
-
-        setLikes(likeMap);
-      }
-    } catch (error) {
-      console.error("Error fetching liked domains:", error);
-    }
-  };
-
-  fetchLikedDomains();
-}, []);
-
-
-const handleDomainBooking = async () => {
-  const userId = localStorage.getItem("user_id");
-  const domainId = selectedDomain?.id;
-  const userType = localStorage.getItem("user_type");
-
-  if (!userId || !domainId) {
-    Swal.fire("Error", "Missing user or domain information.", "error");
-    return;
-  }
-
-  if (userType !== "buyer") {
-    Swal.fire("Access Denied", "You are not a buyer. Please login as a buyer.", "warning");
-    return;
-  }
-
-  const bookingData = {
-    domain_id: domainId,
-    user_id: userId,
-    status: "Pending",
-    payment: "100",
-  };
-
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/domain-bookings`,
-      {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/domain-like`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(bookingData),
-      }
-    );
-
-    const data = await response.json();
-
-    if (data.status) {
-      Swal.fire("Success", data.message, "success").then(() => {
-        handleCloseModal();
+        body: JSON.stringify({
+          domain_id: domainId,
+          user_id: userId,
+        }),
       });
-    } else {
-      Swal.fire("Error", data.message || "Booking failed", "error");
+
+      const json = await res.json();
+
+      if (json.liked !== undefined) {
+        setLikes((prev) => ({
+          ...prev,
+          [domainId]: {
+            liked: json.liked,
+            count: json.like_count,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
     }
-  } catch (error) {
-    Swal.fire("Error", "Something went wrong during booking", "error");
-  }
-};
+  };
+
+  useEffect(() => {
+    const fetchLikedDomains = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/get-liked-domains`);
+        const json = await res.json();
+
+        if (json.status && Array.isArray(json.data)) {
+          const userId = localStorage.getItem("user_id");
+          const likeMap = {};
+          json.data.forEach((like) => {
+            const domainId = like.domain_id;
+
+            if (!likeMap[domainId]) {
+              likeMap[domainId] = {
+                count: 0,
+                liked: false,
+              };
+            }
+
+            likeMap[domainId].count += 1;
+            if (String(like.user_id) === String(userId)) {
+              likeMap[domainId].liked = true;
+            }
+          });
+
+          setLikes(likeMap);
+        }
+      } catch (error) {
+        console.error("Error fetching liked domains:", error);
+      }
+    };
+
+    fetchLikedDomains();
+  }, []);
+
+  const handleDomainBooking = async () => {
+    const userId = localStorage.getItem("user_id");
+    const domainId = selectedDomain?.id;
+    const userType = localStorage.getItem("user_type");
+
+    if (!userId || !domainId) {
+      Swal.fire("Error", "Missing user or domain information.", "error");
+      return;
+    }
+
+    if (userType !== "buyer") {
+      Swal.fire("Access Denied", "You are not a buyer. Please login as a buyer.", "warning");
+      return;
+    }
+
+    const bookingData = {
+      domain_id: domainId,
+      user_id: userId,
+      status: "Pending",
+      payment: "100",
+    };
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/domain-bookings`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bookingData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.status) {
+        Swal.fire("Success", data.message, "success").then(() => {
+          handleCloseModal();
+        });
+      } else {
+        Swal.fire("Error", data.message || "Booking failed", "error");
+      }
+    } catch (error) {
+      Swal.fire("Error", "Something went wrong during booking", "error");
+    }
+  };
+
 
 
   return (
@@ -227,17 +240,21 @@ const handleDomainBooking = async () => {
         </label>
       </div>
 
-      <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-4">
         {currentDomains.map((domain, index) => (
           <div
             key={index}
             className="w-full sm:w-[48%] lg:w-[23%] rounded-lg border border-[#e2e8f0] bg-white shadow-sm flex flex-col"
           >
             <div className="flex flex-col space-y-1.5 p-6 pb-2">
-              <h3 className="font-semibold tracking-tight text-xl break-all">{domain.domain_name}</h3>
+              <h3 className="font-semibold tracking-tight text-xl break-all">
+                {domain.domain_name}
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {domain.is_sponsored === "1" && (
-                  <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-[#ed8936] text-white">Sponsored</span>
+                  <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-[#ed8936] text-white">
+                    Sponsored
+                  </span>
                 )}
                 <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-200 text-gray-800">
                   .{domain.domain_name.split(".").pop()}
@@ -245,7 +262,9 @@ const handleDomainBooking = async () => {
               </div>
             </div>
             <div className="p-6 flex-grow pt-2">
-              <p className="text-muted-foreground mb-4">{domain.description}</p>
+              <p className="text-muted-foreground mb-4">
+                {domain.description}
+              </p>
               <div className="mb-3 flex flex-wrap gap-2">
                 <div className="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-[#317ac4] text-white flex items-center gap-1 w-fit">
                   <svg
@@ -276,30 +295,30 @@ const handleDomainBooking = async () => {
               <p className="text-lg font-bold">$99</p>
             </div>
             <div className="flex justify-between items-center p-6 border-t border-[#e2e8f0]">
-               <button
-                  onClick={() => handleLikeToggle(domain.id)}
-                  className={`justify-center whitespace-nowrap text-sm font-medium h-9 rounded-md px-3 flex items-center gap-1 transition-all ${
-                    likes[domain.id]?.liked ? 'text-red-500' : 'text-gray-500'
-                  }`}
-                  aria-label="Like"
-                  title="Like"
+              <button
+                onClick={() => handleLikeToggle(domain.id)}
+                className={`justify-center whitespace-nowrap text-sm font-medium h-9 rounded-md px-3 flex items-center gap-1 transition-all ${
+                  likes[domain.id]?.liked ? "text-red-500" : "text-gray-500"
+                }`}
+                aria-label="Like"
+                title="Like"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={18}
+                  height={18}
+                  viewBox="0 0 24 24"
+                  fill={likes[domain.id]?.liked ? "#F56040" : "none"}
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-heart transition-colors duration-200"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={18}
-                    height={18}
-                    viewBox="0 0 24 24"
-                    fill={likes[domain.id]?.liked ? "#F56040" : "none"}
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="lucide lucide-heart transition-colors duration-200"
-                  >
-                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                  </svg>
-                  <span>{likes[domain.id]?.count || 0}</span>
-                </button>
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                </svg>
+                <span>{likes[domain.id]?.count || 0}</span>
+              </button>
               <button
                 onClick={() => handleBuyClick(domain)}
                 className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 cursor-pointer"
@@ -462,6 +481,20 @@ const handleDomainBooking = async () => {
           </div>
         </div>
       )}
+      <div>
+      {isSearchMode && (
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={handleShowAllDomains}
+            className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            Show All Domains
+          </button>
+        </div>
+      )}
     </div>
+
+    </div>
+    
   );
 }
