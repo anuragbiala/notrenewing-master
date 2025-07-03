@@ -36,7 +36,7 @@ export default function DomainLeaderboards() {
   };
 
 const handleLikeToggle = async (domainId) => {
-  const userId = localStorage.getItem("user_id");
+    const userId = localStorage.getItem("user_id");
   if (!userId) {
     alert("You have to login to favorite this domain.");
     return;
@@ -69,7 +69,6 @@ const handleLikeToggle = async (domainId) => {
     console.error("Error toggling like:", error);
   }
 };
-
 
 
 useEffect(() => {

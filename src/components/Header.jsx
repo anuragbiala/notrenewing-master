@@ -156,7 +156,7 @@
     if (res.ok) {
       localStorage.removeItem("token");
       localStorage.removeItem("username");
-
+      localStorage.removeItem("user_id");
       Swal.fire("Logged out", "You have been logged out.", "success").then(() => {
         window.location.href = "/"; 
       });
