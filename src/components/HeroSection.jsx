@@ -19,13 +19,22 @@
         setUserType(type);
       }, []);
 
-      const handleClick = () => {
-        if (userType === "seller") {
-          router.push("/seller-dashboard");
-        } else {
-          router.push("/buyer-dashboard");
-        }
-      };
+     const handleClick = () => {
+      const userId = localStorage.getItem("user_id");
+
+      if (!userId) {
+        alert("Please log in First.");
+        return;
+      }
+
+      if (userType === "seller") {
+        router.push("/seller-dashboard");
+      } else {
+        router.push("/buyer-dashboard");
+      }
+    };
+
+
   return (
     <>
       <main>
