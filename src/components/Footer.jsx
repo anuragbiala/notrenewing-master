@@ -1,4 +1,31 @@
-export default function Footer() {
+  "use client";
+
+    import { useState, useEffect } from "react";
+    import { useRouter } from "next/navigation";
+   export default function Footer() {
+      const [userType, setUserType] = useState("Buyer");
+      const router = useRouter();
+
+     useEffect(() => {
+          const type = localStorage.getItem("user_type") || "buyer";
+          setUserType(type);
+        }, []);
+  
+       const handleClick = () => {
+        const userId = localStorage.getItem("user_id");
+  
+        if (!userId) {
+          alert("Please log in First.");
+          return;
+        }
+  
+        if (userType === "seller") {
+          router.push("/seller-dashboard");
+        } else {
+          router.push("/buyer-dashboard");
+        }
+      };
+
   return (
     <>
       <footer className="bg-gray-800 text-white py-12">
@@ -24,11 +51,14 @@ export default function Footer() {
                       Browse Domains
                     </a>
                   </li>
-                  <li>
-                    <a className="hover:underline" href="">
-                      My Account
-                    </a>
-                  </li>
+                 <li>
+                  <button
+                    onClick={handleClick}
+                    className="text-white hover:underline font-medium"
+                  >
+                    My Account
+                  </button>
+                </li>
                 </ul>
               </div>
               <div>

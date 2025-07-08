@@ -78,10 +78,16 @@ useEffect(() => {
   };
 
 
-const handleLikeToggle = async (domainId) => {
+const handleLikeToggle = async (domainId, createdBy) => {
   const userId = localStorage.getItem("user_id");
+
   if (!userId) {
     alert("You have to login to favorite this domain.");
+    return;
+  }
+
+  if (parseInt(userId) === parseInt(createdBy)) {
+    alert("You cannot like your own domain.");
     return;
   }
 
@@ -262,7 +268,7 @@ const handleDomainBooking = async () => {
 
                   <div className="items-center p-6 flex justify-between border-t border-[#e2e8f0] pt-4">
                    <button
-                      onClick={() => handleLikeToggle(domain.id)}
+                      onClick={() => handleLikeToggle(domain.id, domain.created_by)}
                       className={`justify-center whitespace-nowrap text-sm font-medium h-9 rounded-md px-3 flex items-center gap-1 transition-all ${
                         likes[domain.id]?.liked ? 'text-red-500' : 'text-gray-500'
                       }`}

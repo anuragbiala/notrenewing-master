@@ -35,10 +35,17 @@ export default function DomainLeaderboards() {
     setSelectedDomain(null);
   };
 
-const handleLikeToggle = async (domainId) => {
-    const userId = localStorage.getItem("user_id");
+const handleLikeToggle = async (domainId, createdBy) => {
+  const userId = localStorage.getItem("user_id");
+
   if (!userId) {
     alert("You have to login to favorite this domain.");
+    return;
+  }
+
+  // ✅ Check if user is the creator
+  if (parseInt(userId) === parseInt(createdBy)) {
+    alert("You cannot like your own domain.");
     return;
   }
 
@@ -196,7 +203,7 @@ const handleDomainBooking = async () => {
             </div>
             <div className="flex items-center gap-2">
                <button
-                onClick={() => handleLikeToggle(item.id)}
+                onClick={() => handleLikeToggle(item.id, item.created_by)}
                 className={`justify-center whitespace-nowrap text-sm font-medium h-9 rounded-md px-3 flex items-center gap-1 transition-all ${
                   likes[item.id]?.liked ? 'text-red-500' : 'text-gray-500'
                 }`}

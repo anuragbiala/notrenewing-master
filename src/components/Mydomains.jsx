@@ -243,7 +243,7 @@ const handleDelete = async (domainId) => {
               </div>
               <p className="text-lg font-bold">$99</p>
             </div>
-            <div className="p-6 flex justify-between border-t border-[#e2e8f0] pt-4">
+            {/* <div className="p-6 flex justify-between border-t border-[#e2e8f0] pt-4">
               <div className="flex items-center gap-1">
                 <button
                   aria-label="Like"
@@ -272,7 +272,7 @@ const handleDelete = async (domainId) => {
               >
                 Buy Now
               </button>
-            </div>
+            </div> */}
           </div>
         ))}
       </div>

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import DomainSearch from "@/components/CondensedView";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import Swal from "sweetalert2";
+
 
 export default function BrowseDomains() {
   const router = useRouter();
@@ -102,40 +104,46 @@ export default function BrowseDomains() {
     const currentDomains = domains.slice(indexOfFirstDomain, indexOfLastDomain);
     const totalPages = Math.ceil(domains.length / domainsPerPage);
   
-    const handleLikeToggle = async (domainId) => {
-      const userId = localStorage.getItem("user_id");
-      if (!userId) {
-        alert("You have to login to favorite this domain.");
-        return;
-      }
-  
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/domain-like`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            domain_id: domainId,
-            user_id: userId,
-          }),
-        });
-  
-        const json = await res.json();
-  
-        if (json.liked !== undefined) {
-          setLikes((prev) => ({
-            ...prev,
-            [domainId]: {
-              liked: json.liked,
-              count: json.like_count,
-            },
-          }));
-        }
-      } catch (error) {
-        console.error("Error toggling like:", error);
-      }
-    };
+const handleLikeToggle = async (domainId, createdBy) => {
+  const userId = localStorage.getItem("user_id");
+
+  if (!userId) {
+    alert("You have to login to favorite this domain.");
+    return;
+  }
+
+  if (parseInt(userId) === parseInt(createdBy)) {
+    alert("You cannot like your own domain.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/domain-like`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        domain_id: domainId,
+        user_id: userId,
+      }),
+    });
+
+    const json = await res.json();
+
+    if (json.liked !== undefined) {
+      setLikes((prev) => ({
+        ...prev,
+        [domainId]: {
+          liked: json.liked,
+          count: json.like_count,
+        },
+      }));
+    }
+  } catch (error) {
+    console.error("Error toggling like:", error);
+  }
+};
   
     useEffect(() => {
       const fetchLikedDomains = async () => {
@@ -408,95 +416,187 @@ const handleSearch = async (e) => {
         </label>
       </div>
 
-        <div className="flex flex-wrap gap-4">
-        {currentDomains.map((domain, index) => (
-          <div
-            key={index}
-            className="w-full sm:w-[48%] lg:w-[23%] rounded-lg border border-[#e2e8f0] bg-white shadow-sm flex flex-col"
-          >
-            <div className="flex flex-col space-y-1.5 p-6 pb-2">
-              <h3 className="font-semibold tracking-tight text-xl break-all">
-                {domain.domain_name}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {domain.is_sponsored === "1" && (
-                  <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-[#ed8936] text-white">
-                    Sponsored
-                  </span>
-                )}
-                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-200 text-gray-800">
-                  .{domain.domain_name.split(".").pop()}
-                </span>
+       {condensedView ? (
+        <div className="space-y-4">
+          {currentDomains.map((domain, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between bg-white p-4 rounded-md border border-[#e2e8f0] hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center gap-3 flex-grow">
+                <div className="flex-grow min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-lg truncate">
+                      {domain.domain_name}
+                    </h3>
+                    <div className="flex flex-wrap gap-1">
+                      {domain.is_sponsored === "1" && (
+                        <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold bg-[#ed8936] text-white text-xs">
+                          Sponsored
+                        </div>
+                      )}
+                      <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-brand-blue text-white text-xs">
+                      {domain.filter}
+                    </div>
+                      <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-secondary/80 bg-gray-200 text-gray-800 text-xs">
+                        .{domain.domain_name.split(".").pop()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                    <div className="rounded-full border px-2.5 py-0.5 font-semibold bg-[#317ac4] text-white text-xs flex items-center gap-1 w-fit">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={12}
+                        height={12}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="lucide lucide-tag"
+                      >
+                        <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+                        <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+                      </svg>
+                      {domain.category}
+                    </div>
+                    <span className="mx-1">•</span>
+                    <span className="text-amber-600 font-medium">
+                      {getTimeUntilExpiration(domain.exipry_date)}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="p-6 flex-grow pt-2">
-              <p className="text-muted-foreground mb-4">
-                {domain.description}
-              </p>
-              <div className="mb-3 flex flex-wrap gap-2">
-                <div className="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-[#317ac4] text-white flex items-center gap-1 w-fit">
+              <div className="flex items-center gap-4">
+                <span className="font-bold text-lg text-gray-800">$99</span>
+                <button
+                  onClick={() => handleLikeToggle(domain.id, domain.created_by)}
+                  className={`flex items-center gap-1 justify-center text-sm font-medium h-9 rounded-md px-3 transition-all ${
+                    likes[domain.id]?.liked ? "text-red-500" : "text-gray-500"
+                  }`}
+                  aria-label="Like"
+                  title="Like"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width={14}
-                    height={14}
+                    width={18}
+                    height={18}
                     viewBox="0 0 24 24"
-                    fill="none"
+                    fill={likes[domain.id]?.liked ? "#F56040" : "none"}
                     stroke="currentColor"
                     strokeWidth={2}
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    className="lucide lucide-heart transition-colors duration-200"
                   >
-                    <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
-                    <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                   </svg>
-                  {domain.category}
+                  <span>{likes[domain.id]?.count || 0}</span>
+                </button>
+                <button
+                  onClick={() => handleBuyClick(domain)}
+                  className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
+                >
+                  Buy Now
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-4">
+          {currentDomains.map((domain, index) => (
+            <div
+              key={index}
+              className="w-full sm:w-[48%] lg:w-[23%] rounded-lg border border-[#e2e8f0] bg-white shadow-sm flex flex-col hover:shadow-md transition-shadow"
+            >
+              <div className="flex flex-col space-y-1.5 p-6 pb-2">
+                <h3 className="font-semibold tracking-tight text-xl break-all truncate">
+                  {domain.domain_name}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {domain.is_sponsored === "1" && (
+                    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-[#ed8936] text-white">
+                      Sponsored
+                    </span>
+                  )}
+                  <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-200 text-gray-800">
+                    .{domain.domain_name.split(".").pop()}
+                  </span>
                 </div>
               </div>
-              <div className="mb-4">
-                <p className="text-sm">
-                  <strong>Expiration:</strong> {domain.exipry_date}
+              <div className="p-6 flex-grow pt-2">
+                <p className="text-muted-foreground mb-4 line-clamp-3">
+                  {domain.description}
                 </p>
-                <p className="text-sm text-amber-600 font-medium">
-                  {getTimeUntilExpiration(domain.exipry_date)}
-                </p>
+                <div className="mb-3 flex flex-wrap gap-2">
+                  <div className="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-[#317ac4] text-white flex items-center gap-1 w-fit">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width={14}
+                      height={14}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+                      <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+                    </svg>
+                    {domain.category}
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <p className="text-sm">
+                    <strong>Expiration:</strong> {domain.exipry_date}
+                  </p>
+                  <p className="text-sm text-amber-600 font-medium">
+                    {getTimeUntilExpiration(domain.exipry_date)}
+                  </p>
+                </div>
+                <p className="text-lg font-bold">$99</p>
               </div>
-              <p className="text-lg font-bold">$99</p>
-            </div>
-            <div className="flex justify-between items-center p-6 border-t border-[#e2e8f0]">
-              <button
-                onClick={() => handleLikeToggle(domain.id)}
-                className={`justify-center whitespace-nowrap text-sm font-medium h-9 rounded-md px-3 flex items-center gap-1 transition-all ${
-                  likes[domain.id]?.liked ? "text-red-500" : "text-gray-500"
-                }`}
-                aria-label="Like"
-                title="Like"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={18}
-                  height={18}
-                  viewBox="0 0 24 24"
-                  fill={likes[domain.id]?.liked ? "#F56040" : "none"}
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-heart transition-colors duration-200"
+              <div className="flex justify-between items-center p-6 border-t border-[#e2e8f0]">
+                <button
+                  onClick={() => handleLikeToggle(domain.id, domain.created_by)}
+                  className={`flex items-center gap-1 justify-center text-sm font-medium h-9 rounded-md px-3 transition-all ${
+                    likes[domain.id]?.liked ? "text-red-500" : "text-gray-500"
+                  }`}
+                  aria-label="Like"
+                  title="Like"
                 >
-                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                </svg>
-                <span>{likes[domain.id]?.count || 0}</span>
-              </button>
-              <button
-                onClick={() => handleBuyClick(domain)}
-                className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 cursor-pointer"
-              >
-                Buy Now
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={18}
+                    height={18}
+                    viewBox="0 0 24 24"
+                    fill={likes[domain.id]?.liked ? "#F56040" : "none"}
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-heart transition-colors duration-200"
+                  >
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                  </svg>
+                  <span>{likes[domain.id]?.count || 0}</span>
+                </button>
+                <button
+                  onClick={() => handleBuyClick(domain)}
+                  className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 cursor-pointer"
+                >
+                  Buy Now
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+
       <div className="mt-8">
         <nav
           role="navigation"
