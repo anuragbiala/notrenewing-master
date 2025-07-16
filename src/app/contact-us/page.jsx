@@ -98,14 +98,14 @@ export default function Contact() {
               <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
               <circle cx={12} cy={10} r={3} />
             </svg>
-            <div>
+             <div>
               <h3 className="font-medium">Address</h3>
               <p className="text-gray-600">
-                123 Domain Street
+                PO Box 103
                 <br />
-                San Francisco, CA 94107
+                Algonquin, IL. 60102
                 <br />
-                United States
+                {/* United States */}
               </p>
             </div>
           </div>

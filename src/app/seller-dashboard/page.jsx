@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import MyDomains from "@/components/Mydomains";
 import ListDomain from "@/components/Listdomain";
-import InterestedBuyers from "@/components/Interestedbuyers";
+// import InterestedBuyers from "@/components/Interestedbuyers";
 import AccountSettings from "@/components/Accountsettings";
 
 export default function Dashboard() {
@@ -13,7 +13,7 @@ export default function Dashboard() {
   const tabs = [
     { key: "my-domains", label: "My Domains" },
     { key: "list-domain", label: "List a Domain" },
-    { key: "interested-buyers", label: "Interested Buyers" },
+    // { key: "interested-buyers", label: "Interested Buyers" },
     { key: "account", label: "Account Settings" },
   ];
 
@@ -64,11 +64,11 @@ export default function Dashboard() {
                 <ListDomain />
               </div>
             )}
-            {activeTab === "interested-buyers" && (
+            {/* {activeTab === "interested-buyers" && (
               <div>
                 <InterestedBuyers />
               </div>
-            )}
+            )} */}
             {activeTab === "account" && (
               <div>
                 <AccountSettings />

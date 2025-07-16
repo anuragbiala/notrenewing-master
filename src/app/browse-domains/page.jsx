@@ -180,53 +180,71 @@ const handleLikeToggle = async (domainId, createdBy) => {
       fetchLikedDomains();
     }, []);
   
-    const handleDomainBooking = async () => {
-      const userId = localStorage.getItem("user_id");
-      const domainId = selectedDomain?.id;
-      const userType = localStorage.getItem("user_type");
-  
-      if (!userId || !domainId) {
-        Swal.fire("Error", "Missing user or domain information.", "error");
-        return;
+const handleDomainBooking = async () => {
+  const userId = localStorage.getItem("user_id");
+  const userType = localStorage.getItem("user_type");
+  const domainId = selectedDomain?.id;
+
+  // Option 1: If selectedDomain has category_id already
+  const categoryId = selectedDomain?.category_id;
+
+  // Option 2 (uncomment if only category name is available):
+  /*
+  const categoryList = [
+    { id: 1, name: "Technology" },
+    { id: 2, name: "Health" },
+    { id: 3, name: "Finance" },
+  ];
+  const categoryId = categoryList.find(
+    (cat) =>
+      cat.name.toLowerCase() === selectedDomain?.category?.toLowerCase()
+  )?.id;
+  */
+
+  if (!userId || !domainId || !categoryId) {
+    Swal.fire("Error", "Missing user, domain, or category info.", "error");
+    return;
+  }
+
+  if (userType !== "buyer") {
+    Swal.fire("Access Denied", "Only buyers can book domains.", "warning");
+    return;
+  }
+
+  const bookingData = {
+    domain_id: domainId,
+    user_id: userId,
+    category_id: categoryId, // ✅ sent correctly
+    status: "Pending",
+    payment: "99",
+    commission: "1",
+  };
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/domain-bookings`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingData),
       }
-  
-      if (userType !== "buyer") {
-        Swal.fire("Access Denied", "You are not a buyer. Please login as a buyer.", "warning");
-        return;
-      }
-  
-      const bookingData = {
-        domain_id: domainId,
-        user_id: userId,
-        status: "Pending",
-        payment: "100",
-      };
-  
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/domain-bookings`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(bookingData),
-          }
-        );
-  
-        const data = await response.json();
-  
-        if (data.status) {
-          Swal.fire("Success", data.message, "success").then(() => {
-            handleCloseModal();
-          });
-        } else {
-          Swal.fire("Error", data.message || "Booking failed", "error");
-        }
-      } catch (error) {
-        Swal.fire("Error", "Something went wrong during booking", "error");
-      }
-    };
+    );
+
+    const data = await response.json();
+
+    if (data.status) {
+      Swal.fire("Success", data.message, "success").then(() => {
+        handleCloseModal();
+      });
+    } else {
+      Swal.fire("Error", data.message || "Booking failed", "error");
+    }
+  } catch (error) {
+    Swal.fire("Error", "Something went wrong during booking", "error");
+  }
+};
 
   useEffect(() => {
     const fetchTlds = async () => {
