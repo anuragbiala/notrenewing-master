@@ -290,8 +290,14 @@ const handleDomainBooking = async () => {
 const handleSearch = async (e) => {
   e.preventDefault();
 
-  if (!domainInput.trim() && selectedTld === "all" && selectedCategory === "all") {
-    alert("Please enter a domain name, select a TLD, or choose a category.");
+  const isSearchEmpty =
+    !domainInput.trim() &&
+    (selectedTld === "all" || !selectedTld) &&
+    (selectedCategory === "all" || !selectedCategory) &&
+    (sortOrder === "" || !sortOrder);
+
+  if (isSearchEmpty) {
+    alert("Please enter a domain name, select a TLD, choose a category, or select sort order.");
     return;
   }
 
@@ -301,31 +307,30 @@ const handleSearch = async (e) => {
     tld = extractTld(domainInput);
   }
 
-  // Optional TLD check if you want it here...
+  // Save filters locally
+  localStorage.setItem("searchFilters", JSON.stringify({
+    domainInput: domainInput.trim(),
+    selectedTld: tld === "all" ? "" : tld,
+    selectedCategory: selectedCategory === "all" ? "" : selectedCategory,
+    sortOrder,
+  }));
 
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/search-domain`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          domain_name: domainInput.trim(),
-          tld: tld === "all" ? "" : tld,
-          category_id: selectedCategory === "all" ? "" : selectedCategory,
-        }),
-      }
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/search-domain`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        domain_name: domainInput.trim(),
+        tld: tld === "all" ? "" : tld,
+        category_id: selectedCategory === "all" ? "" : selectedCategory,
+        sort_by: sortOrder,
+      }),
+    });
 
     const result = await res.json();
 
     if (result.status) {
-      localStorage.setItem(
-        "searchResults",
-        JSON.stringify(result.data)
-      );
+      localStorage.setItem("searchResults", JSON.stringify(result.data));
       window.location.href = "/browse-domains";
     } else {
       alert(result.message || "No domains found.");
@@ -335,6 +340,7 @@ const handleSearch = async (e) => {
     alert("Something went wrong while searching.");
   }
 };
+
 
 
 
