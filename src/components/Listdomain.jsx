@@ -14,7 +14,6 @@ export default function ListDomain() {
   const [userId, setUserId] = useState(null);
   const [domainName, setDomainName] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [filter, setFilter] = useState("");
   const [description, setDescription] = useState("");
   const [isSponsored, setIsSponsored] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -227,7 +226,6 @@ export default function ListDomain() {
       domain_name: domainName,
       category_id: categoryId,
       created_by: userId,
-      filter: filter,
       exipry_date: selectedDate.toISOString().split("T")[0],
       description,
       is_sponsored: isSponsored ? 1 : 0,
@@ -255,7 +253,6 @@ export default function ListDomain() {
         });
         setDomainName("");
         setCategoryId("");
-        setFilter("");
         setDescription("");
         setSelectedDate(new Date());
         setIsSponsored(false);
@@ -359,8 +356,8 @@ export default function ListDomain() {
           </select>
         </div>
 
-        {/* Filter */}
-        <div className="space-y-2">
+       
+        {/* <div className="space-y-2">
           <label
             className="text-sm font-medium"
             htmlFor="filter"
@@ -382,7 +379,7 @@ export default function ListDomain() {
             </option>
             <option value="Sponsored">Sponsored</option>
           </select>
-        </div>
+        </div> */}
 
         {/* Sponsor */}
         <div className="space-y-2">

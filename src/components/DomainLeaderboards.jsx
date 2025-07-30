@@ -185,22 +185,77 @@ const handleDomainBooking = async () => {
 
 
 
-  const renderDomains = (filter) => {
-    return domains
-      .filter((item) => item.filter === filter)
-      .map((item) => (
-        <div
-          key={item.id}
-          className="border-b border-[#e2e8f0] pb-2 last:border-b-0 last:pb-0 flex flex-col"
-        >
-          <div className="flex justify-between items-center">
-            <div className="font-medium text-base break-all mr-2">
-              {item.domain_name}
-            </div>
-            <div className="text-sm font-bold">$99</div>
+ const renderDomains = (filter) => {
+  return domains
+    .filter((item) => {
+      if (filter === "Sponsored") return item.is_sponsored === "1";
+      if (filter === "Most Popular") return item.most_popular === "1";
+      if (filter === "Staff Picks") return item.staff_picks === "1";
+      return false;
+    })
+    .map((item) => (
+      <div
+        key={item.id}
+        className="border-b border-[#e2e8f0] pb-2 last:border-b-0 last:pb-0 flex flex-col"
+      >
+        <div className="flex justify-between items-center">
+          <div className="font-medium text-base break-all mr-2">
+            {item.domain_name}
           </div>
-          <div className="flex items-center justify-between mt-1">
-            <div className="flex items-center gap-1 text-xs text-gray-500">
+          <div className="text-sm font-bold">$99</div>
+        </div>
+        <div className="flex items-center justify-between mt-1">
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={12}
+              height={12}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-tag"
+            >
+              <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+              <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+            </svg>
+            {item.category.toLowerCase()}
+            <div className="inline-flex items-center rounded-full border px-2.5 font-semibold transition-colors border-transparent hover:bg-secondary/80 bg-gray-100 text-gray-800 text-xs py-0 h-5">
+              .{item.domain_name.split(".").pop()}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleLikeToggle(item.id, item.created_by)}
+              className={`justify-center whitespace-nowrap text-sm font-medium h-9 rounded-md px-3 flex items-center gap-1 transition-all ${
+                likes[item.id]?.liked ? "text-red-500" : "text-gray-500"
+              }`}
+              aria-label="Like"
+              title="Like"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={18}
+                height={18}
+                viewBox="0 0 24 24"
+                fill={likes[item.id]?.liked ? "#F56040" : "none"}
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-heart transition-colors duration-200"
+              >
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+              </svg>
+              <span>{likes[item.id]?.count || 0}</span>
+            </button>
+
+            <button
+              onClick={() => handleBuyClick(item)}
+              className="hover:bg-[#f48134] hover:text-white rounded-md h-6 p-1 flex items-center gap-1 text-xs cursor-pointer"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={12}
@@ -211,69 +266,20 @@ const handleDomainBooking = async () => {
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="lucide lucide-tag"
+                className="lucide lucide-shopping-cart"
               >
-                <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
-                <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+                <circle cx={8} cy={21} r={1} />
+                <circle cx={19} cy={21} r={1} />
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
               </svg>
-              {item.category.toLowerCase()}
-              <div className="inline-flex items-center rounded-full border px-2.5 font-semibold transition-colors border-transparent hover:bg-secondary/80 bg-gray-100 text-gray-800 text-xs py-0 h-5">
-                .{item.domain_name.split(".").pop()}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-               <button
-                onClick={() => handleLikeToggle(item.id, item.created_by)}
-                className={`justify-center whitespace-nowrap text-sm font-medium h-9 rounded-md px-3 flex items-center gap-1 transition-all ${
-                  likes[item.id]?.liked ? 'text-red-500' : 'text-gray-500'
-                }`}
-                aria-label="Like"
-                title="Like"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={18}
-                  height={18}
-                  viewBox="0 0 24 24"
-                  fill={likes[item.id]?.liked ? "#F56040" : "none"}
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-heart transition-colors duration-200"
-                >
-                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                </svg>
-                <span>{likes[item.id]?.count || 0}</span>
-              </button>
-
-              <button
-                onClick={() => handleBuyClick(item)}
-                className="hover:bg-[#f48134] hover:text-white rounded-md h-6 p-1 flex items-center gap-1 text-xs cursor-pointer"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={12}
-                  height={12}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-shopping-cart"
-                >
-                  <circle cx={8} cy={21} r={1} />
-                  <circle cx={19} cy={21} r={1} />
-                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-                </svg>
-                Buy
-              </button>
-            </div>
+              Buy
+            </button>
           </div>
         </div>
-      ));
-  };
+      </div>
+    ));
+};
+
 
   return (
     <section className="py-12 bg-gray-50">
