@@ -10,27 +10,17 @@
       const [activeItem, setActiveItem] = useState(null);
       const [showSignIn, setShowSignIn] = useState(false);
       const [showRegister, setShowRegister] = useState(false);
-      const [userType, setUserType] = useState("Buyer");
+      const [showForgotPassword, setShowForgotPassword] = useState(false);
       const router = useRouter();
 
 
-       useEffect(() => {
-        const type = localStorage.getItem("user_type") || "buyer";
-        setUserType(type);
-      }, []);
-
-      const handleClick = () => {
-        if (userType === "seller") {
+       const handleClick = () => {
           router.push("/seller-dashboard");
-        } else {
-          router.push("/buyer-dashboard");
-        }
-      };
+        };
 
       const [formData, setFormData] = useState({
         full_name: "",
         username: "",
-        user_type: "",
         email: "",
         password: "",
         password_confirmation: "",
@@ -61,6 +51,8 @@
       const closeModals = () => {
         setShowSignIn(false);
         setShowRegister(false);
+        setShowForgotPassword(false);
+
       };
 
       const handleInputChange = (e) => {
@@ -91,7 +83,6 @@
             setFormData({
               full_name: "",
               username: "",
-              user_type: "",
               email: "",
               password: "",
               password_confirmation: "",
@@ -128,7 +119,6 @@
       localStorage.setItem("username", data.user.username || data.user.full_name || "User");
       localStorage.setItem("useremail", data.user.email || "User");
       localStorage.setItem("user_id", data.user.id || "User");
-      localStorage.setItem("user_type", data.user.user_type || "User");
       setUsername(data.user.username || data.user.full_name || "User");
       window.location.reload();
     } else {
@@ -384,12 +374,17 @@
                 Sign In
               </button>
 
-              {/* <button
-                type="button"
-                className="w-full text-sm text-[#0f366b] hover:underline mt-1 cursor-pointer"
-              >
-                Forgot your password?
-              </button> */}
+             <button
+              type="button"
+              onClick={() => {
+                setShowSignIn(false);
+                setShowForgotPassword(true);
+              }}
+              className="w-full text-sm text-[#0f366b] hover:underline mt-1 cursor-pointer"
+            >
+              Forgot your password?
+            </button>
+
             </form>
           </div>
         </div>
@@ -467,26 +462,6 @@
                 />
               </div>
 
-              <div className="space-y-1 mt-4">
-              <label
-                htmlFor="user_type"
-                className="text-sm font-medium text-gray-700"
-              >
-                User Type
-              </label>
-              <select
-                id="user_type"
-                name="user_type"
-                value={formData.user_type}
-                onChange={handleInputChange}
-                required
-                className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0f366b]"
-              >
-                <option value="">Select User Type</option>
-                <option value="seller">Seller</option>
-                <option value="buyer">Buyer</option>
-              </select>
-            </div>
 
               <div className="space-y-1">
                 <label
@@ -552,6 +527,75 @@
           </div>
         </div>
       )}
+      {showForgotPassword && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/80">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg relative">
+              <div className="flex flex-col space-y-1.5 text-center sm:text-left">
+                <h2 className="text-lg font-semibold leading-none tracking-tight">
+                  Forgot Password
+                </h2>
+                <p className="text-sm text-[#64748b]">
+                  Enter your email and we’ll send you a reset link.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeModals}
+                className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={24}
+                  height={24}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-x h-4 w-4"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+                <span className="sr-only">Close</span>
+              </button>
+
+              <form className="space-y-4 mt-10" onSubmit={(e) => {
+                e.preventDefault();
+                // Add your forgot password logic here
+                console.log("Reset link sent to", loginData.email);
+              }}>
+                <div className="space-y-1">
+                  <label
+                    htmlFor="email"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="forgot-email"
+                    name="email"
+                    value={loginData.email}
+                    onChange={handleLoginInputChange}
+                    required
+                    className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0f366b]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full h-10 px-4 py-2 text-sm font-medium text-white bg-[#0f366b] rounded-lg transition cursor-pointer"
+                >
+                  Send Reset Link
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
     </>
   );
 }

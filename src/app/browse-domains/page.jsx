@@ -182,7 +182,6 @@ const handleLikeToggle = async (domainId, createdBy) => {
   
 const handleDomainBooking = async () => {
   const userId = localStorage.getItem("user_id");
-  const userType = localStorage.getItem("user_type");
   const domainId = selectedDomain?.id;
 
   // Option 1: If selectedDomain has category_id already
@@ -203,11 +202,6 @@ const handleDomainBooking = async () => {
 
   if (!userId || !domainId || !categoryId) {
     Swal.fire("Error", "Missing user, domain, or category info.", "error");
-    return;
-  }
-
-  if (userType !== "buyer") {
-    Swal.fire("Access Denied", "Only buyers can book domains.", "warning");
     return;
   }
 
@@ -245,6 +239,7 @@ const handleDomainBooking = async () => {
     Swal.fire("Error", "Something went wrong during booking", "error");
   }
 };
+
 
   useEffect(() => {
     const fetchTlds = async () => {

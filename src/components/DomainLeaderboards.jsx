@@ -43,7 +43,6 @@ const handleLikeToggle = async (domainId, createdBy) => {
     return;
   }
 
-  // ✅ Check if user is the creator
   if (parseInt(userId) === parseInt(createdBy)) {
     alert("You cannot like your own domain.");
     return;
@@ -116,7 +115,6 @@ useEffect(() => {
 
 const handleDomainBooking = async () => {
   const userId = localStorage.getItem("user_id");
-  const userType = localStorage.getItem("user_type");
   const domainId = selectedDomain?.id;
 
   // Option 1: If selectedDomain has category_id already
@@ -140,15 +138,10 @@ const handleDomainBooking = async () => {
     return;
   }
 
-  if (userType !== "buyer") {
-    Swal.fire("Access Denied", "Only buyers can book domains.", "warning");
-    return;
-  }
-
   const bookingData = {
     domain_id: domainId,
     user_id: userId,
-    category_id: categoryId, // ✅ sent correctly
+    category_id: categoryId,
     status: "Pending",
     payment: "99",
     commission: "1",
@@ -179,6 +172,7 @@ const handleDomainBooking = async () => {
     Swal.fire("Error", "Something went wrong during booking", "error");
   }
 };
+
 
 
 
